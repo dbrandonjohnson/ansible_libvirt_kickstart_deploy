@@ -1,0 +1,35 @@
+---
+# Brandon Johnson
+# Libvirt VM Automation using kickstart using data from a CSV file
+# 
+- hosts: 172.16.10.50
+  remote_user: root
+  tasks:
+  - read_csv:
+      path: /path/to/vms.csv
+      key: hostname
+    register: vms
+
+  - debug:
+      msg: "VM Hostname: {{ item.value.hostname }} VMName: {{ item.value.vmname }} IP Address {{ item.value.ipaddr }}"
+    loop: "{{ vms.dict|dict2items }}"
+  
+  - template:
+      src: /path/to/kickstart.ks.j2
+      dest: /tmp/kickstart_rhel7_{{ item.value.vmname }}.ks
+    loop: "{{ vms.dict|dict2items }}"
+  
+  - command: virt-install --connect qemu:///system 
+             --name {{ item.value.vmname }} 
+             --os-variant rhel7.9 
+             --vcpus 4
+             --memory 4096
+             --disk size=100,format=qcow2
+             --noautoconsole
+             --wait -1
+             --network network={{ item.value.vmname }}
+             --location /var/lib/libvirt/images/rhel-server-7.9-x86_64-dvd.iso
+             --initrd-inject=/tmp/kickstart_rhel7_{{ item.value.vmname }}.ks
+             --extra-args "ks=file:/kickstart_rhel7_{{ item.value.vmname }}.ks"
+             --graphics vnc
+    loop: "{{ vms.dict|dict2items }}"
