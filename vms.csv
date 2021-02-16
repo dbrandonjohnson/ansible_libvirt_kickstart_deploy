@@ -1,0 +1,3 @@
+hostname,vmname,ipaddr,netmask,gateway,nameserver
+rhelvm1.lab.open-tec.net,rhelvm1,172.16.10.31,24,172.16.10.1,172.16.10.10
+rhelvm2.lab.open-tec.net,rhelvm2,172.16.10.31,24,172.16.10.1,172.16.10.10
